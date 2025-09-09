@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useSecureTransaction } from '@/hooks/useSecureTransaction';
+import CouponRedemption from '@/components/rewards/CouponRedemption';
 import { 
   Gift, 
   Search, 
@@ -16,7 +18,9 @@ import {
   Coffee,
   Play,
   Shirt,
-  Car
+  Car,
+  Shield,
+  Sparkles
 } from 'lucide-react';
 
 interface Reward {
@@ -42,6 +46,7 @@ const categoryIcons = {
 const Rewards = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { redeemReward, loading: transactionLoading } = useSecureTransaction();
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [filteredRewards, setFilteredRewards] = useState<Reward[]>([]);
   const [userCoins, setUserCoins] = useState(0);
@@ -110,69 +115,24 @@ const Rewards = () => {
   };
 
   const handleRedeem = async (reward: Reward) => {
-    if (userCoins < reward.points_required) {
+    if (!user) {
       toast({
         variant: "destructive",
-        title: "Insufficient coins",
-        description: `You need ${reward.points_required - userCoins} more coins to redeem this reward.`,
+        title: "Authentication Required",
+        description: "Please log in to redeem rewards."
       });
       return;
     }
 
-    try {
-      setLoading(true);
+    const result = await redeemReward(
+      reward.id,
+      reward.points_required,
+      reward.title
+    );
 
-      // Create redemption record
-      const { error: redemptionError } = await supabase
-        .from('reward_redemptions')
-        .insert({
-          user_id: user?.id,
-          reward_id: reward.id,
-          points_used: reward.points_required,
-          status: 'pending'
-        });
-
-      if (redemptionError) throw redemptionError;
-
-      // Create transaction record
-      const { error: transactionError } = await supabase
-        .from('transactions')
-        .insert({
-          user_id: user?.id,
-          transaction_type: 'redeem',
-          points_amount: reward.points_required,
-          reward_id: reward.id,
-          description: `Redeemed: ${reward.title}`
-        });
-
-      if (transactionError) throw transactionError;
-
-      // Update user coins
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ 
-          loyalty_coins: userCoins - reward.points_required 
-        })
-        .eq('user_id', user?.id);
-
-      if (updateError) throw updateError;
-
-      setUserCoins(prev => prev - reward.points_required);
-
-      toast({
-        title: "Reward redeemed successfully!",
-        description: `You've redeemed ${reward.title}. Check your email for details.`,
-      });
-
-    } catch (error) {
-      console.error('Error redeeming reward:', error);
-      toast({
-        variant: "destructive",
-        title: "Redemption failed",
-        description: "Please try again later.",
-      });
-    } finally {
-      setLoading(false);
+    if (result) {
+      // Refresh user coins
+      fetchUserCoins();
     }
   };
 
@@ -192,16 +152,55 @@ const Rewards = () => {
         {/* Header */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary-glow to-secondary bg-clip-text text-transparent">
-            Reward Catalog
+            Secure Rewards Catalog
           </h1>
           <p className="text-xl text-muted-foreground">
-            Redeem your loyalty coins for amazing rewards
+            Redeem your loyalty coins for amazing rewards with military-grade security
           </p>
           <div className="flex items-center justify-center gap-2 p-4 rounded-lg bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20">
             <Coins className="w-6 h-6 text-primary" />
             <span className="text-lg font-semibold">Your Coins: {userCoins}</span>
+            <Shield className="w-4 h-4 text-primary ml-2" />
           </div>
         </div>
+
+        {/* Coupon Redemption Section */}
+        <div className="flex justify-center">
+          <CouponRedemption />
+        </div>
+
+        {/* Sample Coupon Codes */}
+        <Card className="bg-gradient-to-r from-muted/50 to-card/50 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-primary">
+              <Sparkles className="w-5 h-5" />
+              Try These Sample Codes
+            </CardTitle>
+            <CardDescription>
+              Test the secure redemption system with these sample coupon codes
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 rounded-lg bg-background/50 border border-primary/10">
+                <code className="font-mono text-sm text-primary">WELCOME2025</code>
+                <p className="text-xs text-muted-foreground mt-1">100 coins</p>
+              </div>
+              <div className="p-3 rounded-lg bg-background/50 border border-primary/10">
+                <code className="font-mono text-sm text-primary">CRYPTO50</code>
+                <p className="text-xs text-muted-foreground mt-1">50 coins</p>
+              </div>
+              <div className="p-3 rounded-lg bg-background/50 border border-primary/10">
+                <code className="font-mono text-sm text-primary">SECURE25</code>
+                <p className="text-xs text-muted-foreground mt-1">25 coins</p>
+              </div>
+              <div className="p-3 rounded-lg bg-background/50 border border-primary/10">
+                <code className="font-mono text-sm text-primary">LOYALTY75</code>
+                <p className="text-xs text-muted-foreground mt-1">75 coins</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -276,10 +275,10 @@ const Rewards = () => {
                     variant={canAfford ? "hero" : "outline"}
                     size="lg"
                     className="w-full"
-                    disabled={!canAfford || loading}
+                    disabled={!canAfford || loading || transactionLoading}
                     onClick={() => handleRedeem(reward)}
                   >
-                    {canAfford ? 'Redeem Now' : 'Not Enough Coins'}
+                    {transactionLoading ? 'Processing Securely...' : canAfford ? 'Redeem Securely' : 'Not Enough Coins'}
                   </Button>
                   
                   {reward.terms_conditions && (

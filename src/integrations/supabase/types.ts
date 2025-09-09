@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      coupon_codes: {
+        Row: {
+          code: string
+          created_at: string
+          encrypted_data: string | null
+          encryption_iv: string | null
+          expires_at: string | null
+          id: string
+          is_used: boolean | null
+          updated_at: string
+          used_at: string | null
+          used_by: string | null
+          value: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          encrypted_data?: string | null
+          encryption_iv?: string | null
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+          value: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          encrypted_data?: string | null
+          encryption_iv?: string | null
+          expires_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -136,34 +178,76 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: unknown | null
+          risk_level: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          risk_level?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          risk_level?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
+          coupon_code: string | null
           created_at: string
           description: string | null
           id: string
+          nonce: string | null
           points_amount: number
           reward_id: string | null
           status: string
+          transaction_hash: string | null
           transaction_type: string
           user_id: string
         }
         Insert: {
+          coupon_code?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          nonce?: string | null
           points_amount: number
           reward_id?: string | null
           status?: string
+          transaction_hash?: string | null
           transaction_type: string
           user_id: string
         }
         Update: {
+          coupon_code?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          nonce?: string | null
           points_amount?: number
           reward_id?: string | null
           status?: string
+          transaction_hash?: string | null
           transaction_type?: string
           user_id?: string
         }
