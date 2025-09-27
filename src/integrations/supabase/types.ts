@@ -217,7 +217,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
-          nonce: string | null
+          nonce: string
           points_amount: number
           reward_id: string | null
           status: string
@@ -230,7 +230,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          nonce?: string | null
+          nonce: string
           points_amount: number
           reward_id?: string | null
           status?: string
@@ -243,7 +243,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          nonce?: string | null
+          nonce?: string
           points_amount?: number
           reward_id?: string | null
           status?: string
