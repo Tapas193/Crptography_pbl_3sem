@@ -45,8 +45,8 @@ const categoryIcons = {
 
 const Rewards = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const { redeemReward, loading: transactionLoading } = useSecureTransaction();
+  const { toast } = useToast();
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [filteredRewards, setFilteredRewards] = useState<Reward[]>([]);
   const [userCoins, setUserCoins] = useState(0);

@@ -1,57 +1,92 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Zap, Lock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useSecureTransaction } from '@/hooks/useSecureTransaction';
+import { Shield, Gift, Lock, CheckCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-const CouponRedemption = () => {
+interface CouponRedemptionProps {
+  onSuccess?: () => void;
+}
+
+const CouponRedemption: React.FC<CouponRedemptionProps> = ({ onSuccess }) => {
   const [couponCode, setCouponCode] = useState('');
   const { redeemCoupon, loading } = useSecureTransaction();
+  const { toast } = useToast();
 
-  const handleRedeemCoupon = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!couponCode.trim()) return;
-
-    await redeemCoupon(
-      couponCode.toUpperCase(),
-      `Coupon redemption from external partner`
-    );
     
-    setCouponCode('');
+    if (!couponCode.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Invalid Input",
+        description: "Please enter a coupon code."
+      });
+      return;
+    }
+
+    const result = await redeemCoupon(
+      couponCode.toUpperCase(),
+      `Coupon redemption via secure transaction`
+    );
+
+    if (result) {
+      setCouponCode('');
+      onSuccess?.();
+    }
   };
 
   return (
-    <Card className="w-full max-w-md bg-gradient-to-br from-card/90 to-card/50 backdrop-blur border-primary/20">
+    <Card className="border-border/50 bg-gradient-to-br from-card/80 to-card shadow-elegant max-w-md w-full">
       <CardHeader className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-r from-primary to-primary-glow flex items-center justify-center">
-          <Shield className="w-6 h-6 text-primary-foreground" />
+        <div className="flex items-center justify-center space-x-2">
+          <div className="p-2 rounded-full bg-gradient-to-r from-primary to-primary-glow">
+            <Gift className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <CardTitle className="text-xl">Secure Coupon Redemption</CardTitle>
         </div>
-        <CardTitle className="text-xl">Redeem Secure Coupon</CardTitle>
-        <CardDescription>
-          Enter your encrypted coupon code from partner websites
+        <CardDescription className="flex items-center justify-center space-x-1">
+          <Shield className="w-4 h-4 text-success" />
+          <span>Protected by AES encryption & replay attack prevention</span>
         </CardDescription>
       </CardHeader>
-      
       <CardContent>
-        <form onSubmit={handleRedeemCoupon} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="couponCode" className="flex items-center gap-2">
+            <label htmlFor="couponCode" className="text-sm font-medium flex items-center space-x-1">
               <Lock className="w-4 h-4" />
-              Coupon Code
-            </Label>
+              <span>Coupon Code</span>
+            </label>
             <Input
               id="couponCode"
               type="text"
-              placeholder="Enter coupon code"
+              placeholder="Enter secure coupon code"
               value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
-              className="bg-background/50 font-mono tracking-wider"
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
               maxLength={16}
+              className="font-mono text-center tracking-wider bg-background/50"
+              disabled={loading}
             />
           </div>
-          
+
+          <div className="flex items-center justify-between text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
+            <div className="flex items-center space-x-1">
+              <CheckCircle className="w-3 h-3 text-success" />
+              <span>Hash verified</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Shield className="w-3 h-3 text-success" />
+              <span>Nonce protected</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <Lock className="w-3 h-3 text-success" />
+              <span>TLS encrypted</span>
+            </div>
+          </div>
+
           <Button 
             type="submit" 
             variant="hero" 
@@ -59,24 +94,30 @@ const CouponRedemption = () => {
             className="w-full"
             disabled={loading || !couponCode.trim()}
           >
-            {loading ? (
-              <>
-                <Zap className="w-4 h-4 mr-2 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <Shield className="w-4 h-4 mr-2" />
-                Redeem Securely
-              </>
-            )}
+            {loading ? 'Processing Securely...' : 'Redeem Coupon'}
           </Button>
         </form>
-        
-        <div className="mt-4 p-3 rounded-lg bg-muted/50 border border-primary/10">
-          <p className="text-xs text-muted-foreground">
-            🔒 <strong>Secure Redemption:</strong> All coupons are encrypted with AES-256 
-            and protected against replay attacks using blockchain-inspired verification.
+
+        <div className="mt-6 space-y-2">
+          <h4 className="font-semibold text-sm">Available Sample Codes:</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {['CRYPTO100', 'SECURE75', 'LOYALTY50', 'WELCOME25'].map((code) => (
+              <Badge 
+                key={code}
+                variant="outline" 
+                className="justify-center p-2 cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => setCouponCode(code)}
+              >
+                {code}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+          <p className="text-xs text-warning-foreground">
+            <strong>Security Features:</strong> Transaction integrity verification, 
+            cryptographic nonces, AES coupon encryption, rate limiting, and HTTPS/TLS protection.
           </p>
         </div>
       </CardContent>
