@@ -80,13 +80,8 @@ export const useSecureTransaction = () => {
       }
 
       // Call secure transaction edge function
-      const response = await fetch('/api/secure-transaction', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify({
+      const { data: result, error: invokeError } = await supabase.functions.invoke('secure-transaction', {
+        body: {
           userId: user.id,
           amount: params.amount,
           type: params.type,
@@ -95,10 +90,12 @@ export const useSecureTransaction = () => {
           timestamp,
           hash,
           couponCode: encryptedCouponCode
-        })
+        }
       });
 
-      const result = await response.json();
+      if (invokeError) {
+        throw new Error(invokeError.message || 'Transaction failed');
+      }
 
       if (!result.success) {
         throw new Error(result.error || 'Transaction failed');
