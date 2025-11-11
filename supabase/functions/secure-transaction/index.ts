@@ -135,8 +135,8 @@ serve(async (req) => {
       .from('transactions')
       .insert({
         user_id: user.id,
-        amount: transaction.type === 'earn' ? Math.abs(transaction.amount) : -Math.abs(transaction.amount),
-        type: transaction.type,
+        points_amount: transaction.type === 'earn' ? Math.abs(transaction.amount) : -Math.abs(transaction.amount),
+        transaction_type: transaction.type,
         description: transaction.description,
         nonce: transaction.nonce,
         transaction_hash: transaction.hash,
