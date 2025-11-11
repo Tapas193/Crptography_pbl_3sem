@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/components/auth/AuthProvider';
+import { useAdmin } from '@/hooks/useAdmin';
 import { Button } from '@/components/ui/button';
 import { 
   Home, 
@@ -9,7 +10,8 @@ import {
   LogOut, 
   User, 
   HelpCircle,
-  Coins
+  Coins,
+  Shield
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -24,6 +26,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const Navigation = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -70,6 +73,17 @@ const Navigation = () => {
                 <span>{item.label}</span>
               </Button>
             ))}
+            {isAdmin && (
+              <Button
+                variant={location.pathname.startsWith('/admin') ? "default" : "ghost"}
+                size="sm"
+                onClick={() => navigate('/admin')}
+                className="flex items-center space-x-2"
+              >
+                <Shield className="w-4 h-4" />
+                <span>Admin</span>
+              </Button>
+            )}
           </div>
 
           {/* User Menu */}
@@ -116,6 +130,12 @@ const Navigation = () => {
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem onClick={() => navigate('/admin')}>
+                    <Shield className="mr-2 h-4 w-4" />
+                    Admin Panel
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={signOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
