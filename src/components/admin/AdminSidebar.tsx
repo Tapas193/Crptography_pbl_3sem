@@ -1,4 +1,4 @@
-import { Gift, Ticket, LayoutDashboard, ArrowLeft } from 'lucide-react';
+import { Gift, Ticket, LayoutDashboard, ArrowLeft, Shield } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Sidebar,
@@ -17,6 +17,7 @@ const adminItems = [
   { title: 'Dashboard', url: '/admin', icon: LayoutDashboard },
   { title: 'Manage Rewards', url: '/admin/rewards', icon: Gift },
   { title: 'Manage Coupons', url: '/admin/coupons', icon: Ticket },
+  { title: 'Crypto Security', url: '/admin/crypto', icon: Shield },
 ];
 
 export function AdminSidebar() {
