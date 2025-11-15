@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminRewards from "./pages/admin/AdminRewards";
 import AdminCoupons from "./pages/admin/AdminCoupons";
+import AdminCrypto from "./pages/admin/AdminCrypto";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const AppRoutes = () => {
       <Route path="/admin" element={<ProtectedRoute><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/rewards" element={<ProtectedRoute><AdminLayout><AdminRewards /></AdminLayout></ProtectedRoute>} />
       <Route path="/admin/coupons" element={<ProtectedRoute><AdminLayout><AdminCoupons /></AdminLayout></ProtectedRoute>} />
+      <Route path="/admin/crypto" element={<ProtectedRoute><AdminLayout><AdminCrypto /></AdminLayout></ProtectedRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
